@@ -15,12 +15,13 @@ typedef struct {
     int file_desc;
     int last_block_id;
     int max_records;
+    int blocks_number; 
 } HP_info;
 
 typedef struct {
     // Να το συμπληρώσετε
-    int blocks_number;
-    int * next_block;
+    int records_number;
+    int next_block;
 } HP_block_info;
 
 /*Η συνάρτηση HP_CreateFile χρησιμοποιείται για τη δημιουργία και
