@@ -12,8 +12,16 @@ typedef enum HP_ErrorCode {
 typedef struct {
     // Να το συμπληρώσετε
     char * file_type; 
-    int file_desc; 
+    int file_desc;
+    int last_block_id;
+    int max_records;
 } HP_info;
+
+typedef struct {
+    // Να το συμπληρώσετε
+    int blocks_number;
+    int * next_block;
+} HP_block_info;
 
 /*Η συνάρτηση HP_CreateFile χρησιμοποιείται για τη δημιουργία και
 κατάλληλη αρχικοποίηση ενός άδειου αρχείου σωρού με όνομα fileName.

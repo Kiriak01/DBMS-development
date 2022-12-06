@@ -33,6 +33,8 @@ int HP_CreateFile(char *fileName){
     HP_info* hp_info = data; 
     hp_info->file_type = "heap file"; 
     hp_info->file_desc = file_desc;
+    hp_info->last_block_id = 0;
+    hp_info->max_records = BF_BLOCK_SIZE/sizeof(Record); 
 
     BF_Block_SetDirty(block); 
     printf("unpinning and deleting blocks\n");
@@ -79,10 +81,12 @@ HP_info* HP_OpenFile(char *fileName){
 
 
 int HP_CloseFile( HP_info* hp_info ){
+    CALL_BF(BF_CloseFile(hp_info->file_desc));
     return 0;
 }
 
 int HP_InsertEntry(HP_info* hp_info, Record record){
+
     return 0;
 }
 
