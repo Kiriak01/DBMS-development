@@ -30,11 +30,13 @@ int main() {
   srand(12569874);
   int r;
   printf("Insert Entries\n");
+  printf("before: last block id %d\n",info->last_block_id);
   for (int id = 0; id < RECORDS_NUM; ++id) {
     record = randomRecord();
     HP_InsertEntry(info, record);
-    printf("meta thn insert entry to arxeio exei blocks: %d " , info->blocks_number);
+    // printf("meta thn insert entry to arxeio exei blocks: %d " , info->blocks_number);
   }
+printf("after: last block id %d\n",info->last_block_id);
 
   printf("RUN PrintAllEntries\n");
   int id = rand() % RECORDS_NUM;

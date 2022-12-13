@@ -115,8 +115,8 @@ int HP_InsertEntry(HP_info* hp_info, Record record){           //menei panta sto
 
   }else {
     // printf("fortono to block %d",hp_info->last_block_id); 
-    CALL_BF(BF_GetBlock(hp_info->file_desc,last_block_id,block)); 
-  }
+     CALL_BF(BF_GetBlock(hp_info->file_desc,last_block_id,block)); 
+   }
 
   
   char * data = BF_Block_GetData(block); 
@@ -128,10 +128,10 @@ int HP_InsertEntry(HP_info* hp_info, Record record){           //menei panta sto
   // printf("next block is: %d", hp_block_info.next_block); 
 
   int total_records_space = hp_block_info.records_number * sizeof(Record); 
-  // printf("total records in block: %d\n", total_records); 
+  printf("total records in block: %d\n", hp_block_info.records_number); 
   
   int free_space = BF_BLOCK_SIZE - sizeof(HP_block_info) - total_records_space; 
-  printf("free space in block: %d\n",free_space);
+  // printf("free space in block: %d\n",free_space);
 
 
  
@@ -139,45 +139,54 @@ int HP_InsertEntry(HP_info* hp_info, Record record){           //menei panta sto
     // printf("exw xwro\n"); 
     // char * data = BF_Block_GetData(block); 
     int total_records = hp_block_info.records_number; 
-    int offset = total_records*sizeof(Record); 
+    int offset = total_records*sizeof(Record);
+    // printf("total records in free space are: %d\n", total_records);
+    // printf("offset is: %d\n", offset); 
     memcpy(data+offset,&record,sizeof(Record)); 
     hp_block_info.records_number++; 
-    printf("twra poy evala total records %d\n",hp_block_info.records_number); 
-      int total_records_space = hp_block_info.records_number * sizeof(Record); 
-
-    int free_space = BF_BLOCK_SIZE - sizeof(HP_block_info) - total_records_space; 
-  printf("free space in block: %d\n",free_space);
+    memcpy(data+hp_block_info_offset,&hp_block_info,sizeof(HP_block_info));
+    // printf("twra poy evala total records %d\n",hp_block_info.records_number);  
+  // printf("free space in block: %d\n",free_space);
     BF_Block_SetDirty(block);
     CALL_BF(BF_UnpinBlock(block));
-    BF_Block_Destroy(&block); 
-  }  
-  // }else {                                           //3b  if there is no space left, allocate a new block. put hp_block_info in it in the correct offset, then add the record 
-  //   printf("DEN EXW XWRO\n");
-  //   BF_Block *new_block; 
-  //   BF_Block_Init(&new_block); 
-  //   CALL_BF(BF_AllocateBlock(fd,new_block));  
+    BF_Block_Destroy(&block);
+    BF_Block *new_block;
+    BF_Block_Init(&new_block);
+    CALL_BF(BF_GetBlock(hp_info->file_desc,last_block_id,new_block));
+    char* temp_data = BF_Block_GetData(new_block);
+    Record temp_record;
+    memcpy(&temp_record,temp_data,sizeof(Record));
+    // printf("recordis: %s\n", temp_record.surname);
+    CALL_BF(BF_UnpinBlock(new_block));
+    BF_Block_Destroy(&new_block); 
+  }else {                                           //3b  if there is no space left, allocate a new block. put hp_block_info in it in the correct offset, then add the record 
+    printf("DEN EXW XWRO\n");
+    BF_Block *new_block; 
+    BF_Block_Init(&new_block); 
+    CALL_BF(BF_AllocateBlock(fd,new_block));  
     
-  //   char* data = BF_Block_GetData(new_block); 
+    char* data = BF_Block_GetData(new_block); 
 
-  //   // HP_block_info hp_block_info;        //metadedomena block 1 
-  //   hp_block_info.next_block++;
-  //   hp_block_info.records_number=0;
+    // HP_block_info hp_block_info;        //metadedomena block 1 
+    hp_block_info.next_block++;
+    hp_block_info.records_number=0;
 
-  //   int offset = hp_info->max_records*sizeof(Record);
-  //   memcpy(data+offset,&hp_block_info,sizeof(HP_block_info));
+    int offset = hp_info->max_records*sizeof(Record);
+    memcpy(data+offset,&hp_block_info,sizeof(HP_block_info));
 
-  //   memcpy(data,&record,sizeof(Record)); 
+    memcpy(data,&record,sizeof(Record)); 
 
-  //   hp_info->blocks_number++;
-  //   hp_info->last_block_id++;
+    hp_info->blocks_number++;
+    hp_info->last_block_id++;
   
-  //   BF_Block_SetDirty(new_block);
-  //   CALL_BF(BF_UnpinBlock(new_block));  
-  //   BF_Block_Destroy(&new_block);    
-  // }
+    BF_Block_SetDirty(new_block);
+    CALL_BF(BF_UnpinBlock(new_block));  
+    BF_Block_Destroy(&new_block);  
+    CALL_BF(BF_UnpinBlock(block));  
+   BF_Block_Destroy(&block);  
+  }
 
-  // CALL_BF(BF_UnpinBlock(block));  
-  // BF_Block_Destroy(&block); 
+  
 
 
   BF_Block *block0;
@@ -189,9 +198,10 @@ int HP_InsertEntry(HP_info* hp_info, Record record){           //menei panta sto
   data0 = BF_Block_GetData(block0); 
   static HP_info new_hp_info; 
   // printf("sto telos blocks number %d , last block id %d :", hp_info->blocks_number, hp_info->last_block_id); 
+  memcpy(&new_hp_info,data,sizeof(HP_info)); 
   new_hp_info.blocks_number = hp_info->blocks_number;
   new_hp_info.last_block_id = hp_info->last_block_id;
-  memcpy(data0,&new_hp_info,sizeof(HP_info)); 
+
   BF_Block_SetDirty(block0); 
   CALL_BF(BF_UnpinBlock(block0));  
 
