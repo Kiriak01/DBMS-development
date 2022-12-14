@@ -17,17 +17,19 @@
     }                         \
   }
 
+
 int main() {
   BF_Init(LRU);
 
   HP_CreateFile(FILE_NAME);
   HP_info* info = HP_OpenFile(FILE_NAME);
-  // printf("file is of type %s\n ", info->file_type); 
-  // printf("last block id =  %d\n ", info->last_block_id); 
-  printf("total blocks of file: %d", info->blocks_number); 
+
 
   Record record;
-  srand(12569874);
+  // srand(12569874);
+  time_t t;
+  srand((unsigned) time(&t));    //changed srand with time because it gave the same value over and over. Sometime no id exists for getAllEntries 
+
   int r;
   printf("Insert Entries\n");
   printf("before: last block id %d\n",info->last_block_id);

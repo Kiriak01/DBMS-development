@@ -17,11 +17,28 @@
     }                         \
   }
 
+// #define CALL_BF(call)       \
+// {                           \
+//   BF_ErrorCode code = call; \
+//   if (code != BF_OK) {         \
+//     BF_PrintError(code);    \
+//     return HT_ERROR;        \
+//   }        
+
+
 int main() {
   BF_Init(LRU);
 
   HT_CreateFile(FILE_NAME,10);
   HT_info* info = HT_OpenFile(FILE_NAME);
+
+   for (int i = 0; i < info->num_of_buckets; i++) {
+    printf("bucket %d , %d\n", i , info->hash_table[i]); 
+  }
+
+  int blocksnum; 
+  CALL_OR_DIE(BF_GetBlockCounter(info->file_desc,&blocksnum)); 
+  printf("blocks num %d\n", blocksnum); 
 
   Record record;
   srand(12569874);

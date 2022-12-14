@@ -3,14 +3,28 @@
 #include <record.h>
 
 
-
+typedef enum HT_ErrorCode {
+  HT_ERROR, 
+  HT_OK 
+} HT_ErrorCode;
 
 typedef struct {
     // Να το συμπληρώσετε
+    char * file_type; 
+    int file_desc;
+    int last_block_id;
+    int max_records;
+    int blocks_number;
+    int num_of_buckets;
+    int hash_table[];  
 } HT_info;
 
 typedef struct {
     // Να το συμπληρώσετε
+    int records_number;
+    int next_block;
+    int block_id; 
+    int overflowing_bucket; 
 } HT_block_info;
 
 /*Η συνάρτηση HT_CreateFile χρησιμοποιείται για τη δημιουργία
