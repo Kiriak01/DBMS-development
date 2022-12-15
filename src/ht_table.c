@@ -111,31 +111,128 @@ int HT_CloseFile( HT_info* HT_info ){
 
 int HT_InsertEntry(HT_info* ht_info, Record record){         // hash function = id%numofbuckets => auto sou dinei to bucket, kai apo ayto to bucket pairneis to block toy,
         //an xwraei h eggrafh thn bazeis, an oxi allocate kainoyrio kai allagh metadedomenwn ht info kai ht block info vlepe diafaneies 
-  
-  // BF_Block *block0;
-  // BF_Block_Init(&block0); 
-  // CALL_OR_DIE(BF_GetBlock(ht_info->file_desc,0,block0)); 
-  
-  
-  // char * data = BF_Block_GetData(block0); 
-  // memcpy(&ht_info,data,sizeof(HT_info)); 
+  int bucket = record.id % ht_info->num_of_buckets; 
+  // printf("hash function returns bucket%d\n",bucket);
+  int block_number = ht_info->hash_table[bucket]; 
+  // printf("bucket points to block %d\n", block_number); 
 
-  // for (int i = 0; i < ht_info->num_of_buckets; i++) {
-  //   printf("bucket %d , %d\n", i , ht_info->hash_table[i]); 
-  // }
-  
-  
-  // CALL_OR_DIE(BF_UnpinBlock(block0));  
+  BF_Block *block;
+  BF_Block_Init(&block); 
+  CALL_OR_DIE(BF_GetBlock(ht_info->file_desc,block_number,block));  
 
+  HT_block_info ht_block_info; 
+  char * data = BF_Block_GetData(block); 
+  int ht_block_info_offset = ht_info->max_records*sizeof(Record);
+  memcpy(&ht_block_info,data+ht_block_info_offset,sizeof(HT_block_info)); 
 
-  // BF_Block_Destroy(&block0); 
+  // printf("block %d has records %d\n", ht_info->max_records, ht_block_info.records_number); 
+  int total_records_space = ht_block_info.records_number * sizeof(Record); 
+  
+  int free_space = BF_BLOCK_SIZE - sizeof(HT_block_info) - total_records_space; 
+
+  if (free_space >= sizeof(record)) {  //xwreaei 
+    int total_records = ht_block_info.records_number; 
+    int offset = total_records * sizeof(Record);
+    memcpy(data+offset,&record,sizeof(Record)); 
+    ht_block_info.records_number++; 
+    memcpy(data+ht_block_info_offset,&ht_block_info,sizeof(HT_block_info));
+    BF_Block_SetDirty(block);
+    CALL_OR_DIE(BF_UnpinBlock(block));
+    BF_Block_Destroy(&block); 
+  } else { 
+
+    BF_Block *new_block; 
+    BF_Block_Init(&new_block); 
+    CALL_OR_DIE(BF_AllocateBlock(ht_info->file_desc,new_block));  
+    char* data = BF_Block_GetData(new_block); 
+    HT_block_info new_ht_block_info; 
+    new_ht_block_info.records_number=0;
+    int blocksnum; 
+    CALL_OR_DIE(BF_GetBlockCounter(ht_info->file_desc,&blocksnum)); 
+    new_ht_block_info.block_id = blocksnum; 
+    new_ht_block_info.overflowing_bucket = block_number; 
+
+    int offset = ht_info->max_records*sizeof(Record);
+    memcpy(data+offset,&ht_block_info,sizeof(HT_block_info));
+
+    memcpy(data,&record,sizeof(Record)); 
+    
+    ht_info->blocks_number++; 
+    ht_info->last_block_id++;
+
+    BF_Block_SetDirty(new_block);
+    CALL_OR_DIE(BF_UnpinBlock(new_block));  
+    BF_Block_Destroy(&new_block);  
+    CALL_OR_DIE(BF_UnpinBlock(block));   
+    BF_Block_Destroy(&block);  
+
+  }
+  
+  BF_Block *block0;                                     //updating block 0 of file (hp info) 
+  BF_Block_Init(&block0); 
+
+  CALL_OR_DIE(BF_GetBlock(ht_info->file_desc, 0, block0)); 
+
+  char* data0;
+  data0 = BF_Block_GetData(block0); 
+  static HT_info new_ht_info; 
+  memcpy(&new_ht_info,data0,sizeof(HT_info)); 
+  new_ht_info.blocks_number = ht_info->blocks_number;
+  new_ht_info.last_block_id = ht_info->last_block_id;
+
+  BF_Block_SetDirty(block0); 
+  CALL_OR_DIE(BF_UnpinBlock(block0));  
+  BF_Block_Destroy(&block0); 
+
+  return block_number; 
+
     return 0;
 }
 
-int HT_GetAllEntries(HT_info* ht_info, void *value ){
-    return 0;
+int HT_GetAllEntries(HT_info* ht_info, int value ){
+  int total_blocks_read = 0; 
+  int found_record = 0; 
+
+  for (int i = 1; i < ht_info->blocks_number; i++) {
+    BF_Block * temp_block; 
+    BF_Block_Init(&temp_block); 
+
+    CALL_OR_DIE(BF_GetBlock(ht_info->file_desc, i, temp_block)); 
+
+    char* temp_data;
+    temp_data = BF_Block_GetData(temp_block); 
+    HT_block_info ht_block_info; 
+
+    int ht_block_info_offset = ht_info->max_records*sizeof(Record);
+    memcpy(&ht_block_info,temp_data+ht_block_info_offset,sizeof(HT_block_info));
+
+    for (int j = 0; j < ht_block_info.records_number; j++) { 
+      int offset = j * sizeof(Record); 
+      Record temp_record; 
+      memcpy(&temp_record,temp_data+offset,sizeof(Record)); 
+      if (temp_record.id == value) {
+        found_record = 1; 
+        printf("%s, id: %d, name: %s, surname: %s, city: %s \n", temp_record.record, temp_record.id, temp_record.name,
+                                                                  temp_record.surname, temp_record.city); 
+        total_blocks_read = i;                                          
+      }
+    }
+  
+    CALL_OR_DIE(BF_UnpinBlock(temp_block));  
+    BF_Block_Destroy(&temp_block); 
+   
+   
+     
+  }    
+  if (found_record == 1) {
+    printf("total blocks read to find record: %d\n",total_blocks_read);
+    return total_blocks_read;
+  }
+  
+   return -1;
 }
 
+//hashstatistics; 
 
 
 

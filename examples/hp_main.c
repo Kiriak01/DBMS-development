@@ -35,6 +35,7 @@ int main() {
   printf("before: last block id %d\n",info->last_block_id);
   for (int id = 0; id < RECORDS_NUM; ++id) {
     record = randomRecord();
+    // printf("record has id %d\n", record.id); 
     HP_InsertEntry(info, record);
     // printf("meta thn insert entry to arxeio exei blocks: %d " , info->blocks_number);
   }

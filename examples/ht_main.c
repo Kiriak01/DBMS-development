@@ -32,14 +32,6 @@ int main() {
   HT_CreateFile(FILE_NAME,10);
   HT_info* info = HT_OpenFile(FILE_NAME);
 
-   for (int i = 0; i < info->num_of_buckets; i++) {
-    printf("bucket %d , %d\n", i , info->hash_table[i]); 
-  }
-
-  int blocksnum; 
-  CALL_OR_DIE(BF_GetBlockCounter(info->file_desc,&blocksnum)); 
-  printf("blocks num %d\n", blocksnum); 
-
   Record record;
   srand(12569874);
   int r;
@@ -48,10 +40,11 @@ int main() {
     record = randomRecord();
     HT_InsertEntry(info, record);
   }
-
+  
   printf("RUN PrintAllEntries\n");
   int id = rand() % RECORDS_NUM;
-  HT_GetAllEntries(info, &id);
+  printf("\nSearching for: %d\n",id);
+  HT_GetAllEntries(info, id);
 
   HT_CloseFile(info);
   BF_Close();

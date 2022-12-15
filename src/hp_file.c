@@ -79,7 +79,8 @@ int HP_CloseFile( HP_info* hp_info ){
     return 0;
 }
 
-int HP_InsertEntry(HP_info* hp_info, Record record){           //menei panta sto block 1, prosthetei thn eggrafh alla den katafernei na synexisei apo kei ke pera
+int HP_InsertEntry(HP_info* hp_info, Record record){          
+  // printf("record has id %d\n", record.id); 
   int blocks_num; 
   int last_block_id = hp_info->last_block_id; 
   int fd = hp_info->file_desc; 
@@ -129,14 +130,14 @@ int HP_InsertEntry(HP_info* hp_info, Record record){           //menei panta sto
     CALL_BF(BF_UnpinBlock(block));
     BF_Block_Destroy(&block);
     
-    BF_Block *new_block;
-    BF_Block_Init(&new_block);
-    CALL_BF(BF_GetBlock(hp_info->file_desc,last_block_id,new_block));
-    char* temp_data = BF_Block_GetData(new_block);
-    Record temp_record;
-    memcpy(&temp_record,temp_data,sizeof(Record));
-    CALL_BF(BF_UnpinBlock(new_block));
-    BF_Block_Destroy(&new_block); 
+    // BF_Block *new_block;
+    // BF_Block_Init(&new_block);
+    // CALL_BF(BF_GetBlock(hp_info->file_desc,last_block_id,new_block));
+    // char* temp_data = BF_Block_GetData(new_block);
+    // Record temp_record;  
+    // memcpy(&temp_record,temp_data,sizeof(Record));
+    // CALL_BF(BF_UnpinBlock(new_block));
+    // BF_Block_Destroy(&new_block); 
 
   }else {                                           //3b
                                                     //  if there is no space left, allocate a new block. put hp_block_info in it in the correct offset, then add the record 
@@ -192,7 +193,6 @@ int HP_InsertEntry(HP_info* hp_info, Record record){           //menei panta sto
 }
 
 int HP_GetAllEntries(HP_info* hp_info, int value){
-  printf("total blocks in file %d\n", hp_info->blocks_number); 
   int total_blocks_read = 0; 
   int found_record = 0; 
 
@@ -209,11 +209,10 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
     int hp_block_info_offset = hp_info->max_records*sizeof(Record);
     memcpy(&hp_block_info,temp_data+hp_block_info_offset,sizeof(HP_block_info));
 
-    for (int j = 0; j < hp_block_info.records_number; j++) {
-      int offset = j & sizeof(Record); 
+    for (int j = 0; j < hp_block_info.records_number; j++) { 
+      int offset = j * sizeof(Record); 
       Record temp_record; 
       memcpy(&temp_record,temp_data+offset,sizeof(Record)); 
-      // printf("block , value %d , %d \n", i , value);  
       if (temp_record.id == value) {
         found_record = 1; 
         printf("%s, id: %d, name: %s, surname: %s, city: %s \n", temp_record.record, temp_record.id, temp_record.name,
@@ -229,6 +228,7 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
      
   }    
   if (found_record == 1) {
+        printf("total blocks read to find record: %d\n",total_blocks_read);
         return total_blocks_read;
     }
   
