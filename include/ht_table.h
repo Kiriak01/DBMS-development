@@ -25,6 +25,7 @@ typedef struct {
     int next_block;
     int block_id; 
     int overflowing_bucket; 
+    int bucket; 
 } HT_block_info;
 
 /*Η συνάρτηση HT_CreateFile χρησιμοποιείται για τη δημιουργία
@@ -71,5 +72,6 @@ int HT_InsertEntry(HT_info* header_info, /*επικεφαλίδα του αρχ�
 int HT_GetAllEntries(HT_info* header_info, /*επικεφαλίδα του αρχείου*/
 	int value /*τιμή του πεδίου-κλειδιού προς αναζήτηση*/);
 
+int HashStatistics(char* filename); 
 
 #endif // HT_FILE_H

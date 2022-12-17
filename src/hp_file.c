@@ -129,15 +129,6 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_Block_SetDirty(block);
     CALL_BF(BF_UnpinBlock(block));
     BF_Block_Destroy(&block);
-    
-    // BF_Block *new_block;
-    // BF_Block_Init(&new_block);
-    // CALL_BF(BF_GetBlock(hp_info->file_desc,last_block_id,new_block));
-    // char* temp_data = BF_Block_GetData(new_block);
-    // Record temp_record;  
-    // memcpy(&temp_record,temp_data,sizeof(Record));
-    // CALL_BF(BF_UnpinBlock(new_block));
-    // BF_Block_Destroy(&new_block); 
 
   }else {                                           //3b
                                                     //  if there is no space left, allocate a new block. put hp_block_info in it in the correct offset, then add the record 
@@ -230,7 +221,7 @@ int HP_GetAllEntries(HP_info* hp_info, int value){
   if (found_record == 1) {
         printf("total blocks read to find record: %d\n",total_blocks_read);
         return total_blocks_read;
-    }
+  }
   
    return -1;
 }

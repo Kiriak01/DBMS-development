@@ -43,7 +43,7 @@ printf("after: last block id %d\n",info->last_block_id);
 
   printf("RUN PrintAllEntries\n");
   int id = rand() % RECORDS_NUM;
-  printf("\nSearching for: %d",id);
+  printf("\nSearching for: %d\n",id);
   HP_GetAllEntries(info, id);
 
 

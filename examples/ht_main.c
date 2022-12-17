@@ -17,14 +17,6 @@
     }                         \
   }
 
-// #define CALL_BF(call)       \
-// {                           \
-//   BF_ErrorCode code = call; \
-//   if (code != BF_OK) {         \
-//     BF_PrintError(code);    \
-//     return HT_ERROR;        \
-//   }        
-
 
 int main() {
   BF_Init(LRU);
@@ -46,6 +38,11 @@ int main() {
   printf("\nSearching for: %d\n",id);
   HT_GetAllEntries(info, id);
 
+
   HT_CloseFile(info);
+
+  HashStatistics(FILE_NAME); 
+
+
   BF_Close();
 }

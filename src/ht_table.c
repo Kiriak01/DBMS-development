@@ -35,6 +35,8 @@ int HT_CreateFile(char *fileName,  int buckets){
     ht_info.num_of_buckets = buckets;
     ht_info.hash_table[buckets]; 
 
+    
+
 
     memcpy(data,&ht_info,sizeof(HT_info));
 
@@ -77,6 +79,7 @@ HT_info* HT_OpenFile(char *fileName){
     // ht_block_info.next_block=2;
     ht_block_info.records_number=0;
     ht_block_info.block_id = i + 1; 
+    ht_block_info.bucket = i; 
     ht_info.hash_table[i] = ht_block_info.block_id; 
 
     memcpy(data+offset,&ht_block_info,sizeof(HT_block_info)); 
@@ -151,11 +154,14 @@ int HT_InsertEntry(HT_info* ht_info, Record record){         // hash function = 
     CALL_OR_DIE(BF_GetBlockCounter(ht_info->file_desc,&blocksnum)); 
     new_ht_block_info.block_id = blocksnum; 
     new_ht_block_info.overflowing_bucket = block_number; 
+    new_ht_block_info.bucket = bucket; 
 
     int offset = ht_info->max_records*sizeof(Record);
-    memcpy(data+offset,&ht_block_info,sizeof(HT_block_info));
 
     memcpy(data,&record,sizeof(Record)); 
+
+    memcpy(data+offset,&new_ht_block_info,sizeof(HT_block_info));
+
     
     ht_info->blocks_number++; 
     ht_info->last_block_id++;
@@ -220,8 +226,6 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
   
     CALL_OR_DIE(BF_UnpinBlock(temp_block));  
     BF_Block_Destroy(&temp_block); 
-   
-   
      
   }    
   if (found_record == 1) {
@@ -232,7 +236,81 @@ int HT_GetAllEntries(HT_info* ht_info, int value ){
    return -1;
 }
 
-//hashstatistics; 
+int HashStatistics(char *filename) {
+  HT_info* info = HT_OpenFile(filename);
+
+  int blocksnum; 
+  CALL_OR_DIE(BF_GetBlockCounter(info->file_desc, &blocksnum));
+  printf("Total Blocks in hash file: %d\n", blocksnum); 
+
+  int offset = info->max_records*sizeof(Record);
+
+  int bucket_array[info->num_of_buckets]; 
+  int total_overflowing_buckets[info->num_of_buckets]; 
+
+  for (int i = 0; i < info->num_of_buckets; i++) {
+    bucket_array[i] = 0; 
+    total_overflowing_buckets[i] = 0; 
+  }
+  int total_records = 0; 
+
+  for (int i = 1; i < blocksnum; i++) {
+    BF_Block * temp_block; 
+    BF_Block_Init(&temp_block); 
+    CALL_OR_DIE(BF_GetBlock(info->file_desc, i, temp_block));
+
+    HT_block_info ht_block_info; 
+
+    char *data = BF_Block_GetData(temp_block); 
+    memcpy(&ht_block_info,data+offset,sizeof(HT_block_info)); 
+
+    int bucket = ht_block_info.bucket;
+    // printf("block %d , bucket %d\n", i , bucket); 
+    bucket_array[bucket]++; 
+    total_records+=6; 
+    if (ht_block_info.overflowing_bucket!=0) {
+      total_overflowing_buckets[bucket]++; 
+    }
+    
+    CALL_OR_DIE(BF_UnpinBlock(temp_block));  
+    BF_Block_Destroy(&temp_block); 
+  }
+
+  int max_records, min_records; 
+  max_records = -1;
+  min_records = 100000;
+  int total_blocks = 0; 
+  for (int i = 0; i < info->num_of_buckets; i++) {
+    total_blocks +=bucket_array[i]; 
+    int total_recs_in_bucket = bucket_array[i] * 6; 
+    if (total_recs_in_bucket > max_records) {
+      max_records = total_recs_in_bucket; 
+    }
+    if (total_recs_in_bucket < min_records){
+      min_records = total_recs_in_bucket; 
+    }
+  }
+
+  int total_buckets=0; 
+  for (int i = 0; i < info->num_of_buckets; i++){
+    if (total_overflowing_buckets[i] != 0) {
+      total_buckets++;
+    }
+  }
+ 
+  printf("Min amount of records in bucket: %d\n", min_records);
+  printf("Max amount of records in bucket: %d\n", max_records);
+  printf("Average amount of records in bucket: %d\n", total_records/info->num_of_buckets);
+  printf("Average amount of blocks in a bucket: %d\n", total_blocks/info->num_of_buckets);
+  printf("Total buckets that have an overflowing bucket: %d\n", total_buckets); 
+
+  for (int i = 0; i < info->num_of_buckets;i++) {
+    printf("bucket: %d , has total overflowing buckets: %d\n", i , total_overflowing_buckets[i]);
+  }
+
+  HT_CloseFile(info);
+
+}
 
 
 
