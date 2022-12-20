@@ -28,18 +28,15 @@ int main() {
   Record record;
   // srand(12569874);
   time_t t;
-  srand((unsigned) time(&t));    //changed srand with time because it gave the same value over and over. Sometime no id exists for getAllEntries 
+  srand((unsigned) time(&t));    //changed srand with time because it gave the same value over and over.
 
   int r;
   printf("Insert Entries\n");
-  printf("before: last block id %d\n",info->last_block_id);
   for (int id = 0; id < RECORDS_NUM; ++id) {
     record = randomRecord();
-    // printf("record has id %d\n", record.id); 
     HP_InsertEntry(info, record);
-    // printf("meta thn insert entry to arxeio exei blocks: %d " , info->blocks_number);
   }
-printf("after: last block id %d\n",info->last_block_id);
+
 
   printf("RUN PrintAllEntries\n");
   int id = rand() % RECORDS_NUM;
