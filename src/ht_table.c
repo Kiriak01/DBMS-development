@@ -73,7 +73,7 @@ HT_info* HT_OpenFile(char *fileName){
 
     ht_info.last_block_id++; 
     ht_info.blocks_number++; 
-    void* data = BF_Block_GetData(block);
+    void* data = BF_Block_GetData(temp_block);
 
     HT_block_info ht_block_info;        //metadata of block 
     ht_block_info.records_number=0;
