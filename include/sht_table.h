@@ -4,15 +4,34 @@
 #include <ht_table.h>
 
 
-
+typedef struct {
+    char * name;
+    int block_id; 
+} Pair;
 
 typedef struct {
     // Να το συμπληρώσετε
+    char * file_type; 
+    int file_desc;
+    int last_block_id;
+    int max_pairs;
+    int blocks_number;
+    int num_of_buckets;
+    int HT_num_of_blocks;
+    int Hash_table[100];   
 } SHT_info;
 
 typedef struct {
     // Να το συμπληρώσετε
+    int pairs_number;
+    // int next_block;
+    int block_id; 
+    // int overflowing_bucket; 
+    int bucket; 
 } SHT_block_info;
+
+int hash_string(char * name, int buckets); 
+
 
 /*Η συνάρτηση SHT_CreateSecondaryIndex χρησιμοποιείται για τη δημιουργία
 και κατάλληλη αρχικοποίηση ενός αρχείου δευτερεύοντος κατακερματισμού με
@@ -65,5 +84,6 @@ int SHT_SecondaryGetAllEntries(
     SHT_info* header_info, /* επικεφαλίδα του αρχείου δευτερεύοντος ευρετηρίου*/
     char* name /* το όνομα στο οποίο γίνεται αναζήτηση */);
 
+int SHT_search(int block_id, HT_info * ht_info, char * name);
 
 #endif // SHT_FILE_H

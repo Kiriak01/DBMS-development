@@ -98,6 +98,7 @@ HT_info* HT_OpenFile(char *fileName){
   
   if (ht_info.file_type == "hash file") {
     printf("file is good (hash file).\n"); 
+
     return &ht_info;  
   }
 
@@ -111,13 +112,16 @@ int HT_CloseFile( HT_info* HT_info ){
     return 0;
 }
 
-int HT_InsertEntry(HT_info* ht_info, Record record){        
+int HT_InsertEntry(HT_info* ht_info, Record record){     
   int bucket = record.id % ht_info->num_of_buckets;  //hash function 
   int block_number = ht_info->hash_table[bucket];    //getting the correct block to insert from hash function, from hash table array 
+
 
   BF_Block *block;
   BF_Block_Init(&block); 
   CALL_OR_DIE(BF_GetBlock(ht_info->file_desc,block_number,block));   //getting the correct block 
+
+
 
   HT_block_info ht_block_info; 
   char * data = BF_Block_GetData(block); 
@@ -127,6 +131,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   int total_records_space = ht_block_info.records_number * sizeof(Record); 
   
   int free_space = BF_BLOCK_SIZE - sizeof(HT_block_info) - total_records_space; 
+
 
   if (free_space >= sizeof(record)) {  // there is enough space for entry of record in block 
     int total_records = ht_block_info.records_number; 
@@ -160,6 +165,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     ht_info->blocks_number++; 
     ht_info->last_block_id++;
 
+
     BF_Block_SetDirty(new_block);
     CALL_OR_DIE(BF_UnpinBlock(new_block));  
     BF_Block_Destroy(&new_block);  
@@ -167,6 +173,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
     BF_Block_Destroy(&block);  
 
   }
+
   
   BF_Block *block0;                                     //updating block 0 of file (hp info) 
   BF_Block_Init(&block0); 
@@ -184,6 +191,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
   BF_Block_SetDirty(block0); 
   CALL_OR_DIE(BF_UnpinBlock(block0));  
   BF_Block_Destroy(&block0); 
+
 
   return block_number; 
 

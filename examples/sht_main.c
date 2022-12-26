@@ -6,7 +6,7 @@
 #include "ht_table.h"
 #include "sht_table.h"
 
-#define RECORDS_NUM 30 // you can change it if you want
+#define RECORDS_NUM  30 // you can change it if you want
 #define FILE_NAME "data.db"
 #define INDEX_NAME "index.db"
 
@@ -21,12 +21,16 @@
 
 
 int main() {
-    srand(12569874);
+    // srand(12569874);
+    time_t t;
+    srand((unsigned) time(&t)); 
     BF_Init(LRU);
     // Αρχικοποιήσεις
     HT_CreateFile(FILE_NAME,10);
-    SHT_CreateSecondaryIndex(INDEX_NAME,10,FILE_NAME);
+    // SHT_CreateSecondaryIndex(INDEX_NAME,10,FILE_NAME);
     HT_info* info = HT_OpenFile(FILE_NAME);
+
+    SHT_CreateSecondaryIndex(INDEX_NAME,10,FILE_NAME);    //moved createSHT after HT_OpenFile, because we create the blocks for the HT File in HT_Open. 
     SHT_info* index_info = SHT_OpenSecondaryIndex(INDEX_NAME);
 
     // Θα ψάξουμε στην συνέχεια το όνομα searchName
@@ -41,6 +45,7 @@ int main() {
         int block_id = HT_InsertEntry(info, record);
         SHT_SecondaryInsertEntry(index_info, record, block_id);
     }
+
     // Τυπώνουμε όλες τις εγγραφές με όνομα searchName
     printf("RUN PrintAllEntries for name %s\n",searchName);
     SHT_SecondaryGetAllEntries(info,index_info,searchName);
@@ -48,6 +53,9 @@ int main() {
     // Κλείνουμε το αρχείο κατακερματισμού και το δευτερεύον ευρετήριο
     SHT_CloseSecondaryIndex(index_info);
     HT_CloseFile(info);
+
+    // HashStatistics(INDEX_NAME); 
+
     //
     BF_Close();
 }
