@@ -54,7 +54,7 @@ int main() {
     SHT_CloseSecondaryIndex(index_info);
     HT_CloseFile(info);
 
-    // HashStatistics(INDEX_NAME); 
+    HashStatistics(FILE_NAME);  
 
     //
     BF_Close();

@@ -24,9 +24,7 @@ typedef struct {
 typedef struct {
     // Να το συμπληρώσετε
     int pairs_number;
-    // int next_block;
     int block_id; 
-    // int overflowing_bucket; 
     int bucket; 
 } SHT_block_info;
 
@@ -85,5 +83,6 @@ int SHT_SecondaryGetAllEntries(
     char* name /* το όνομα στο οποίο γίνεται αναζήτηση */);
 
 int SHT_search(int block_id, HT_info * ht_info, char * name);
+
 
 #endif // SHT_FILE_H
