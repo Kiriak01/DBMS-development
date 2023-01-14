@@ -46,6 +46,7 @@ int HT_CreateFile(char *fileName,  int buckets){
     
 
     CALL_OR_DIE(BF_CloseFile(file_desc)); 
+    printf("Successfully created a new Hash File.\n");
 
     return 0;
 }
@@ -97,7 +98,7 @@ HT_info* HT_OpenFile(char *fileName){
 
   
   if (ht_info.file_type == "hash file") {
-    printf("file is good (hash file).\n"); 
+    printf("Successfully opened Hash File.\n"); 
 
     return &ht_info;  
   }
@@ -108,7 +109,7 @@ HT_info* HT_OpenFile(char *fileName){
 
 int HT_CloseFile( HT_info* HT_info ){
     CALL_OR_DIE(BF_CloseFile(HT_info->file_desc));
-
+    printf("Closing Hash File.\n"); 
     return 0;
 }
 
@@ -174,6 +175,7 @@ int HT_InsertEntry(HT_info* ht_info, Record record){
 
   }
 
+  printf("Inserted record with id: %d in bucket: %d and block: %d\n", record.id, bucket, block_number ); 
   
   BF_Block *block0;                                     //updating block 0 of file (hp info) 
   BF_Block_Init(&block0); 

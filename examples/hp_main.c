@@ -31,7 +31,7 @@ int main() {
   srand((unsigned) time(&t));    //changed srand with time because it gave the same value over and over.
 
   int r;
-  printf("Insert Entries\n");
+  printf("\nInsert Entries\n");
   for (int id = 0; id < RECORDS_NUM; ++id) {
     record = randomRecord();
     HP_InsertEntry(info, record);

@@ -40,9 +40,8 @@ int HP_CreateFile(char *fileName){
     CALL_BF(BF_UnpinBlock(block)); 
     BF_Block_Destroy(&block); 
     
-
-
     CALL_BF(BF_CloseFile(file_desc)); 
+    printf("Successfully created a new Heap File.\n");
     return 0;
 }
 
@@ -64,7 +63,7 @@ HP_info* HP_OpenFile(char *fileName){
 
   
   if (hp_info.file_type == "heap file") {     //If file is heap file then it's good so return hp info. 
-    printf("file is good."); 
+    printf("Successfully opened a Heap File."); 
     return &hp_info;  
   }
 
@@ -74,6 +73,7 @@ HP_info* HP_OpenFile(char *fileName){
 
 int HP_CloseFile( HP_info* hp_info ){
     CALL_BF(BF_CloseFile(hp_info->file_desc));
+    printf("Closed a Heap File\n"); 
     return 0;
 }
 
@@ -126,7 +126,6 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_Block_SetDirty(block);
     CALL_BF(BF_UnpinBlock(block));
     BF_Block_Destroy(&block);
-
   }else {                                           //if insertion of record overflows the given block 
                                                     // allocate a new block. putting hp_block_info in it in the correct offset, then adding the record 
     BF_Block *new_block; 
@@ -154,6 +153,7 @@ int HP_InsertEntry(HP_info* hp_info, Record record){
     BF_Block_Destroy(&block);  
   }
 
+  printf("Inserted record with id: %d in block with number: %d \n", record.id, last_block_id); 
   
 
 

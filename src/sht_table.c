@@ -67,7 +67,7 @@ int SHT_CreateSecondaryIndex(char *sfileName,  int buckets, char* fileName){
     CALL_OR_DIE(BF_CloseFile(file_desc)); 
     CALL_OR_DIE(BF_CloseFile(HT_file_desc));
 
-
+    printf("Successfully created a new SHT index file.\n"); 
 }
 
 SHT_info* SHT_OpenSecondaryIndex(char *indexName){
@@ -115,7 +115,7 @@ SHT_info* SHT_OpenSecondaryIndex(char *indexName){
 
   
   if (sht_info.file_type == "secondary index file") {
-    printf("Index file is good.\n"); 
+    printf("Successfully opened SHT index file.\n"); 
     return &sht_info;  
   }
 
@@ -126,7 +126,7 @@ SHT_info* SHT_OpenSecondaryIndex(char *indexName){
 
 int SHT_CloseSecondaryIndex( SHT_info* SHT_info ){
   CALL_OR_DIE(BF_CloseFile(SHT_info->file_desc));
-
+  printf("Closing SHT index file.\n"); 
   return 0;
 }
 
@@ -163,6 +163,8 @@ int SHT_SecondaryInsertEntry(SHT_info* sht_info, Record record, int block_id){
     CALL_OR_DIE(BF_UnpinBlock(block));
     BF_Block_Destroy(&block); 
   }
+
+  printf("Inserted pair: %s,%d in bucket: %d and block: %d\n", pair.name, pair.block_id, bucket, block_number);
 
   BF_Block *block0;                                     //updating block 0 of index file (sht info) 
   BF_Block_Init(&block0); 
