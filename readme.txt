@@ -1,12 +1,1 @@
-Για την δημιουργία του εκτελέσιμου το οποίο δείχνει
-τις δυνατότητες της βιβλιοθήκης BF, τρέξτε την εντολή:
-
-make bf;
-
-Για να τρέξετε το εκτελέσιμο:
-
-./build/bf_main
-
-Αντίστοιχα και για τα άλλα εκτελέσιμα.
-make ht;
-make hp;
+C program to create software for database systems. Heaps and Hash Tables are some of the data structures used to store data.
